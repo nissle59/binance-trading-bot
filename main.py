@@ -275,12 +275,15 @@ def check_schema(schema: Schema):
 
 
 if __name__ == '__main__':
+    f = open('full-income', 'r')
+    full_income = int(f.read())
+    f.close()
     base_count = 100
     base_currency = 'BUSD'
-    stf = 'BOT STARTED with {0} {1}\n'.format(base_count.__str__(), base_currency)
+    stf = '\n---------------- BOT STARTED with {0} {1} ------------------'.format(base_count.__str__(), base_currency)
     logger_main.info(stf)
     schemas = []
-    full_income = 0
+    #full_income = 0
     start_time = datetime.datetime.now()
     info = get_exchange_info('info.json')
     symbols = get_symbols_data('symbols_info.json')
@@ -293,8 +296,8 @@ if __name__ == '__main__':
                 s = Schema(first_symbol, second_symbol)
                 s.calculate_schema(symbols)
                 if not (s.error):
-                    if s.base_currency in ['BUSD', 'USDT', 'USDC']:
-                        schemas.append(s)
+                    #if s.base_currency in ['BUSD', 'USDT', 'USDC']:
+                    schemas.append(s)
     logger_main.info(f'Total schemas: {str(len(schemas))}')
     threshold = 0
     logger_main.info(f'Current profit threshold: {str(threshold)}')
@@ -311,10 +314,14 @@ if __name__ == '__main__':
         symbols = get_exchange_symbols('s.json')
         for sch in schemas:
             sch.calculate_schema(symbols)
-            if (sch.base_currency in ['BUSD', 'USDT', 'USDC']) and ((sch.final_count - sch.base_count) > threshold):
+            #if (sch.base_currency in ['BTC','ETH','DOGE']) and ((sch.final_count - sch.base_count) > threshold):
+            if (sch.final_count - sch.base_count) > (threshold - 0.3):
                 i = check_schema(sch)
                 if i > threshold:
                     full_income += i
+                    f = open('full-income', 'w')
+                    f.write(str(full_income))
+                    f.close()
                     """
                     st = '------------------------------------------------------------------\n'
                     st += 'Base count: 100 ' + sch.base_currency + '\n'
@@ -326,7 +333,7 @@ if __name__ == '__main__':
                     st += 'Difference: {0}'.format(float(sch.final_count) - i)+'\n'
                     st += '------------------------------------------------------------------\n\n'
                     """
-                    stf = '[{0}]: {1} {2} -> {3} ({4}) -> {5} ({6}) -> {7} ({8}) =>> {9}; FULL: {10}\n'.format(
+                    stf = '[{0}]: {1} {2} -> {3} ({4}) -> {5} ({6}) -> {7} ({8}) =>> {9}; FULL: {10}'.format(
                         datetime.datetime.now().__str__(), sch.base_count, sch.base_currency, sch.first_pair,
                         sch.first_rate, sch.second_pair, sch.second_rate, sch.third_pair, sch.third_rate,
                         sch.base_count + i, full_income.__str__())
@@ -339,3 +346,8 @@ if __name__ == '__main__':
                             sch.final_count - sch.base_count) - i)
                     logger_stream.info(st)
                     print(st)
+            else:
+                st = '{0} -> {1} -> {2} -> {0}: Profit: {3}'.format(sch.base_currency,
+                                                                                         sch.second_currency,
+                                                                                         sch.third_currency, sch.final_count - sch.base_count)
+                print(st)

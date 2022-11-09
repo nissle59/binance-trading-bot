@@ -276,7 +276,7 @@ def check_schema(schema: Schema):
 
 if __name__ == '__main__':
     f = open('full-income', 'r')
-    full_income = int(f.read())
+    full_income = float(f.read())
     f.close()
     base_count = 100
     base_currency = 'BUSD'
